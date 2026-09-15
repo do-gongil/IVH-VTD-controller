@@ -2,9 +2,7 @@
 
 VTD(Virtual Test Drive) 시뮬레이터용 자율주행 제어기입니다.
 TCP 락스텝으로 시뮬레이터와 20 Hz 로 주고받으며, OpenDRIVE HD 맵 위에서 경유지 CSV 를
-차로 단위 주행 경로로 계획하고 순수추종(pure pursuit) 횡제어와 속도 프로파일로 주행합니다.
-
-외부 의존성은 `numpy` 하나뿐이고 나머지는 전부 표준 라이브러리입니다.
+차로 단위 주행 경로로 계획하고 순수추종 횡제어와 속도 프로파일로 주행합니다.
 
 ## Architecture
 
@@ -62,7 +60,3 @@ python3 -m unittest discover -s tests -t .
 ```
 numpy>=1.24
 ```
-
-## License
-
-All rights reserved. 대회 맥락에서 작성된 코드이며 별도 라이선스를 부여하지 않습니다.
