@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 문서 전부 제외 — README 만 예외
+# DAYOF.md / 대회당일_운용카드.html 에 주최측 개인 연락처가 있어 저장소에 넣지 않는다.
+# PROTOCOL.md 도 같은 방침으로 제외한다. 로컬 원본은 그대로 보존된다.
+*.md
+!README.md
+*.html
+
+# 주최측 제공 HD 맵 — 재배포 권리 미확인
+data/*.xodr
+
+# 주행 로그 / 계획기 스윕 실패 케이스 (실행마다 재생성)
+logs/
+sweep_fail/
+
+# 런타임 산출물
+*.png
+*.ppm
+route_day.csv

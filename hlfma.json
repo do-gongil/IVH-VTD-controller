@@ -1,0 +1,7 @@
+{
+  "host": "127.0.0.1",
+  "port": 9910,
+  "cruise": 12.5,
+  "connect_timeout_s": 600,
+  "first_packet_s": 120
+}
