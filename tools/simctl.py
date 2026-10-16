@@ -34,8 +34,8 @@ def require_vtd() -> None:
         s.settimeout(1.0)
         if s.connect_ex(("127.0.0.1", SCP_PORT)) != 0:
             sys.exit("VTD 가 실행 중이 아니다 (SCP 48179 닫힘). 먼저 실행할 것:\n"
-                     "  ~/Hexagon/VTD.2025.2/bin/vtdStop.sh\n"
-                     "  DISPLAY=:5 /opt/VirtualGL/bin/vglrun -d egl ~/Hexagon/VTD.2025.2/bin/vtdStart.sh &\n"
+                     f"  {VTD_ROOT}/bin/vtdStop.sh\n"
+                     f"  DISPLAY=:5 /opt/VirtualGL/bin/vglrun -d egl {VTD_ROOT}/bin/vtdStart.sh &\n"
                      "  (LICENSING_STATE: 1(OK) 확인 후 30초 뒤 다시 load)")
 
 
