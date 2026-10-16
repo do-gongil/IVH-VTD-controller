@@ -26,6 +26,7 @@ def wrap(a: float) -> float:
     return (a + math.pi) % (2 * math.pi) - math.pi
 
 
+@unittest.skipUnless(DEFAULT_XODR.is_file(), f"HD 맵 없음: {DEFAULT_XODR}")
 class PlannerRoutes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -33,6 +34,8 @@ class PlannerRoutes(unittest.TestCase):
         cls.rp = RoutePlanner(cls.net)
 
     def _check(self, name: str):
+        if not ROUTES[name].is_file():
+            self.skipTest(f"경로 CSV 없음: {ROUTES[name]}")
         wps = load_waypoints(str(ROUTES[name]))
         path = self.rp.plan(wps, verbose=False)
         straight = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(wps, wps[1:]))

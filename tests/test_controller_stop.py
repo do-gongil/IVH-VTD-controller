@@ -3,21 +3,25 @@
 경로 누적거리를 2 m 간격 인덱스(r.cum[idx])로만 알면 (1) 정지선을 ~2 m 넘고
 (2) 마지막 인덱스에서 포화해 완주 판정이 서지 않는다. 둘 다 실차에서 관측됐다.
 
-실행: cd controller && python3 -m unittest tests.test_controller_stop -v
+실행: python3 -m unittest tests.test_controller_stop -v  (저장소 루트에서)
 """
 from __future__ import annotations
 
 import math
 import unittest
+from pathlib import Path
 
-from hlfma.config import RunConfig
+from hlfma.config import ROOT_DIR, RunConfig
 from hlfma.odr import RoadNetwork
 from hlfma.planner import RoutePlanner, load_waypoints
 from hlfma.route import Route
 from hlfma.controller import Controller
 from hlfma.hlvtd import TL_RED, TL_GREEN, TL_YELLOW
 
-ROUTE = "../redmine/attachments/news29_route_pretest.csv"
+CONFIG = ROOT_DIR / "hlfma.json"
+ROUTE = ROOT_DIR.parent / "redmine/attachments/news29_route_pretest.csv"     # 저장소 바깥
+MISSING = [str(p) for p in (Path(RunConfig.load(CONFIG).xodr), ROUTE) if not p.is_file()]
+needs_data = unittest.skipIf(MISSING, f"HD 맵/경로 CSV 없음: {', '.join(MISSING)}")
 
 
 def obj_at(r: Route, cum: float, lat: float, size, speed: float = 0.0,
@@ -80,10 +84,11 @@ def drive(ctl: Controller, r: Route, tl_state: int, max_s: float = 400.0, objs_a
     return s, False
 
 
+@needs_data
 class StopAccuracy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cfg = RunConfig.load("hlfma.json")
+        cfg = RunConfig.load(CONFIG)
         net = RoadNetwork(cfg.xodr)
         path = RoutePlanner(net).plan(load_waypoints(ROUTE), verbose=False)
         cls.cfg, cls.net, cls.path = cfg, net, path
@@ -152,12 +157,13 @@ class StopAccuracy(unittest.TestCase):
         self.assertLess(abs(s - ctl.goal_cum), 2.0, f"종료 위치 오차 {s - ctl.goal_cum:+.2f} m")
 
 
+@needs_data
 class ObjectAvoidance(unittest.TestCase):
     """선행차 추종·보행자 정지 — 실주행에서 한 번도 발동하지 않아 별도 검증한다."""
 
     @classmethod
     def setUpClass(cls):
-        cfg = RunConfig.load("hlfma.json")
+        cfg = RunConfig.load(CONFIG)
         net = RoadNetwork(cfg.xodr)
         cls.cfg, cls.net = cfg, net
         cls.path = RoutePlanner(net).plan(load_waypoints(ROUTE), verbose=False)
@@ -210,12 +216,13 @@ class ObjectAvoidance(unittest.TestCase):
         self.assertTrue(done, f"인도 보행자 때문에 완주하지 못했다: {s:.1f} m, state={ctl.state}")
 
 
+@needs_data
 class ConeFinishLine(unittest.TestCase):
     """라바콘 종료선 검출 경로 (실주행 검증은 콘 미배치라 폴백 경로만 확인됨)."""
 
     @classmethod
     def setUpClass(cls):
-        cfg = RunConfig.load("hlfma.json")
+        cfg = RunConfig.load(CONFIG)
         net = RoadNetwork(cfg.xodr)
         cls.cfg, cls.net = cfg, net
         cls.path = RoutePlanner(net).plan(load_waypoints(ROUTE), verbose=False)

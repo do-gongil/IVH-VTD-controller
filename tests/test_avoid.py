@@ -7,11 +7,14 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 from hlfma.config import RunConfig
 from hlfma.controller import AVOID_MARGIN, CONE_HALF
 from hlfma.odr import RoadNetwork
 from hlfma.perception import blocking_cones, classify, is_marker
+
+XODR = Path(RunConfig().xodr)
 
 BARROW = {"length": 1.01, "width": 2.06, "height": 0.85, "speed": 0.0}   # WheelBarrow01 실측
 PYLON = {"length": 0.15, "width": 0.46, "height": 0.61, "speed": 0.0}    # 라바콘 실측
@@ -60,6 +63,7 @@ class TestAvoidMargin(unittest.TestCase):
         self.assertEqual(blocking_cones([rel], half, offset=-off), [])  # 비키면 풀린다
 
 
+@unittest.skipUnless(XODR.is_file(), f"HD 맵 없음: {XODR}")
 class TestBoundaryMark(unittest.TestCase):
     """실선 차로변경 금지 판정의 근거 데이터."""
 
