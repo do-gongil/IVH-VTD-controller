@@ -14,12 +14,13 @@
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-VTD_ROOT = Path("/home/dap/Hexagon/VTD.2025.2")
+VTD_ROOT = Path(os.environ.get("VTD_ROOT", "/home/dap/Hexagon/VTD.2025.2"))
 SCP_GEN = VTD_ROOT / "Runtime/Tools/ScpGenerator/scpGenerator"
 SCP_PORT = 48179
 TC_LOG = Path("/tmp/taskRec_TaskControl.txt")

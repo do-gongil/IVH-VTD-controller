@@ -12,7 +12,7 @@ from hlfma.config import DEFAULT_XODR
 from hlfma.odr import RoadNetwork
 from hlfma.planner import RoutePlanner, load_waypoints, path_length, MAX_GAP, MAX_TURN_DEG, on_drivable
 
-ROOT = Path(__file__).resolve().parent.parent.parent      # ~/Documents/HL_FMA
+ROOT = Path(__file__).resolve().parent.parent.parent      # 저장소의 상위 폴더
 ROUTES = {
     "route_example": ROOT / "route_example.csv",
     "pretest": ROOT / "redmine/attachments/news29_route_pretest.csv",

@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import copy
 import math
+import os
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -23,9 +24,9 @@ from hlfma.odr import RoadNetwork
 from hlfma.planner import RoutePlanner, load_waypoints
 import scenario as sc                                   # tools/scenario.py
 
-SCEN_DIR = Path("/home/dap/Hexagon/VTD.2025.2/Data/Projects/Current/Scenarios")
+SCEN_DIR = Path(os.environ.get("VTD_ROOT", "/home/dap/Hexagon/VTD.2025.2")) / "Data/Projects/Current/Scenarios"
 BASE = SCEN_DIR / "HL_FMA_VTD_LivingLab.xml"
-TEMPLATE = Path("/home/dap/Hexagon/VTD.2025.2/Data/Projects/SampleProject/Scenarios/PassingPedestrian.xml")
+TEMPLATE = SCEN_DIR.parents[1] / "SampleProject/Scenarios/PassingPedestrian.xml"
 
 
 def _parent_map(root):

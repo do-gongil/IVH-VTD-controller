@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -19,7 +20,7 @@ from hlfma.odr import RoadNetwork
 from hlfma.planner import RoutePlanner, load_waypoints
 from hlfma.route import Route
 
-VTD_ROOT = Path("/home/dap/Hexagon/VTD.2025.2")
+VTD_ROOT = Path(os.environ.get("VTD_ROOT", "/home/dap/Hexagon/VTD.2025.2"))
 SCEN_DIR = VTD_ROOT / "Data/Projects/SampleProject/Scenarios"
 BASE = SCEN_DIR / "HL_FMA_VTD_LivingLab_news29_route_pretest_2_test.xml"
 

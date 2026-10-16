@@ -96,6 +96,25 @@ HD 맵과 경로 CSV 가 없으면 해당 테스트는 사유와 함께 **skip**
 두고 같은 명령을 실행합니다. 테스트 안의 파일 경로(`hlfma.json`, 맵, CSV)는 `__file__` 기준으로 잡으므로
 작업 폴더에 영향받지 않습니다.
 
+## Tools
+
+`tools/` 의 보조 스크립트입니다. VTD 를 다루는 스크립트는 `VTD_ROOT` 환경변수로 설치 경로를 지정합니다
+(기본값 `/home/dap/Hexagon/VTD.2025.2`).
+
+| 스크립트 | 역할 |
+|---|---|
+| `simctl.py` | VTD 시뮬레이션 제어 (SCP) — 시나리오 교체·리셋 |
+| `use_setup.sh` | VTD 셋업 전환 (`Data/Setups/Current` 링크 변경) |
+| `make_scenario.py` | 기준 시나리오에 NPC 차량·보행자를 추가한 시나리오 생성 |
+| `build_scenario.py` | 경로 CSV 기준 Ego 배치 + NPC 차량 + 횡단 보행자 시나리오 생성 |
+| `make_obstacle_scenario.py` | 정적 장애물 + 라바콘 종료선 시험 시나리오 생성 |
+| `scenario.py` | 경로 CSV 분석 및 시나리오 시작점 정합 |
+| `sweep_routes.py` | 계획기 견고성 스윕 — 합성 경로를 대량으로 돌려 하드 실패 탐색 |
+| `check_overpass.py` | 계획 경로의 입체교차(터널/고가) 통과 여부 검사 |
+| `check_solidline.py` | 차로변경의 실선·중앙선 횡단 여부 검사 |
+| `plot_path.py` | 도로망 + 계획 경로 + 경유지를 PNG 로 출력 (ffmpeg 필요) |
+| `dayof_net.sh` | 대회 당일 VTD PC 와 이더넷 직결용 고정 IP 설정 + 연결 점검 |
+
 ## Not in this repository
 
 | 항목 | 제외 사유 |
@@ -113,3 +132,8 @@ HD 맵과 경로 CSV 가 없으면 해당 테스트는 사유와 함께 **skip**
 ```
 numpy>=1.24
 ```
+
+## Contributors
+
+- [LEE Dohyun (@do-gongil)](https://github.com/do-gongil)
+- [@imyeonseog](https://github.com/imyeonseog)
