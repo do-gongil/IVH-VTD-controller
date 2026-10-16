@@ -20,6 +20,50 @@ TCP 락스텝으로 시뮬레이터와 20 Hz 로 주고받으며, OpenDRIVE HD �
 시뮬레이터가 객체 타입을 주지 않기 때문에, 콘·보행자·차량 구분은 치수와 속도로 직접 분류합니다.
 에고 속도도 제공되지 않아 위치 차분으로 유도합니다.
 
+### 모듈 / 데이터 흐름
+
+`run_controller.py` 의 실행 순서와 `hlfma` 패키지 내부 import 를 그대로 옮긴 그림입니다.
+
+```mermaid
+flowchart LR
+    CSV["경유지 CSV (seq,x,y)"] --> planner
+    XODR["data/*.xodr"] --> odr
+    JSON["hlfma.json"] --> config
+    odr -->|RoadNetwork| planner
+    planner -->|"PathPoint 목록"| route
+    odr -->|RoadNetwork| route
+    config -->|"Vehicle, Control"| route
+    route -->|Route| controller
+    config -->|RunConfig| controller
+    VTD["VTD 시뮬레이터"] <-->|"TCP 락스텝 20 Hz"| hlvtd
+    hlvtd -->|"ego_pose, traffic_light, objects"| controller
+    controller -->|"objects → relate()"| perception
+    perception -->|"Rel, 콘 판정, 종료선"| controller
+    controller -->|"steer, accel, signal"| hlvtd
+    controller -->|"frame, event"| runlog
+```
+
+### 거동 상태기계 (`hlfma/controller.py`)
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRIVE
+    DRIVE --> RECOVER: 횡오차 > lat_err_recover (3.0 m)
+    TL_STOP --> RECOVER: 횡오차 > lat_err_recover
+    RECOVER --> DRIVE: 횡오차 < 0.8 m
+    DRIVE --> TL_STOP: 적색·정지가능 황색·미확인 신호, 정지선 0.4 m 이내 & v < 0.3
+    RECOVER --> TL_STOP: 같은 조건
+    FINISHING --> TL_STOP: 같은 조건
+    TL_STOP --> DRIVE: 녹색 / 점멸 1 s 정지 후 / 교차로 진입 / 신호 정보 없음
+    DRIVE --> FINISHING: 남은 거리 < 40 m
+    RECOVER --> FINISHING: 남은 거리 < 40 m
+    FINISHING --> DONE: 라바콘 종료선 통과 또는 목표 0.6 m 이내 & v < 0.25
+    DONE --> [*]
+```
+
+- 리스폰(한 스텝 5 m 초과 이동)은 상태와 무관하게 남은 거리 > 40 m 면 `DRIVE`, 아니면 `FINISHING` 으로 되돌립니다.
+- 정지 감시(워치독 L1~L3)는 상태를 바꾸지 않고 `stuck_level` 로 제약만 단계적으로 풉니다.
+
 ## Run
 
 ```bash
@@ -39,9 +83,18 @@ python3 -m unittest discover -s tests -t .
 
 31개 (`test_avoid` 9 · `test_cones` 8 · `test_controller_stop` 10 · `test_planner_routes` 4).
 
-> **테스트 실행에는 HD 맵이 필요합니다.** 모든 테스트가 `hlfma.config.DEFAULT_XODR` 를 통해
-> `data/HL_FMA_VTD_LivingLab.xodr` 를 읽습니다. 이 파일은 저장소에 포함하지 않았으므로
-> (아래 참조) 주최측 제공본을 `data/` 에 직접 배치해야 테스트와 `--plan-only` 가 동작합니다.
+HD 맵과 경로 CSV 가 없으면 해당 테스트는 사유와 함께 **skip** 됩니다 (실패하지 않습니다).
+
+| 테스트 | 필요한 외부 파일 |
+|---|---|
+| `test_cones` 8개 전부, `test_avoid` 의 `TestClassify`·`TestAvoidMargin` 7개 (**15개**) | 없음 — CI 에서 실행 |
+| `test_avoid.TestBoundaryMark` 2개, `test_planner_routes.test_regress_curvature_1139` | `data/HL_FMA_VTD_LivingLab.xodr` (경로는 `tests/fixtures/` 에 포함) |
+| `test_controller_stop` 10개 | 맵 + `../redmine/attachments/news29_route_pretest.csv` |
+| `test_planner_routes` 나머지 3개 | 맵 + `../route_example.csv`, `../redmine/attachments/news29_route_pretest{,_2}.csv` |
+
+전체를 돌리려면 주최측 제공 HD 맵을 `data/` 에, 경로 CSV 를 위 표의 경로(`../` 는 저장소 루트의 상위 폴더)에
+두고 같은 명령을 실행합니다. 테스트 안의 파일 경로(`hlfma.json`, 맵, CSV)는 `__file__` 기준으로 잡으므로
+작업 폴더에 영향받지 않습니다.
 
 ## Not in this repository
 
